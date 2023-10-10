@@ -125,15 +125,45 @@ def get_generator(vocab_size, dec_hidden_size, device):
 #         print('print out ExtSummarizer', self)
 
     
-class exBert(nn.Module):
-    def __init__(self, config_2 = 'src/bert_config_ex_s3.json', checkpoint_path='path.pth', finetune=False):
-        super(exBert, self).__init__()
-        bert_config_1 = BertConfigNew.from_json_file('src/bert_config.json')
+class exBert_model(nn.Module):
+    def __init__(self, config_2 = './bert_config_ex_s3.json', checkpoint_path='./models_Presumm/Best_stat_dic_exBERTe2_b16_lr1e-05.pth', finetune=False):
+        super(exBert_model, self).__init__()
+        bert_config_1 = BertConfigNew.from_json_file('./bert_config.json')
         bert_config_2 = BertConfigNew.from_json_file(config_2)
 
         self.model = BertModelNew(bert_config_1, bert_config_2)
         checkpoint = torch.load(checkpoint_path)
-        self.model.load_state_dict(checkpoint)
+        
+       
+        model_state_dict = self.state_dict()
+
+        def remove_prefix(key):
+            if key.startswith("bert.") or key.startswith("model.") :
+                return key[len("bert."):] or  key.startswith("model.")
+            return key
+
+        for checkpoint_key in checkpoint.keys():
+            model_key = remove_prefix(checkpoint_key)
+            if model_key in model_state_dict:
+                model_state_dict[model_key] = checkpoint[checkpoint_key]
+
+        self.model.load_state_dict(model_state_dict)
+        
+        model_state_dict = self.state_dict()
+
+        # # Define a function to remove the "bert." prefix from keys
+        # def remove_prefix(key):
+        #     if key.startswith("bert."):
+        #          return key[len("bert."):]
+        #     return key
+        
+        # # Iterate through checkpoint keys and rename them
+        # for checkpoint_key in checkpoint.keys():
+        #     model_key = remove_prefix(checkpoint_key)
+        #     if model_key in model_state_dict:
+        #         model_state_dict[model_key] = checkpoint[checkpoint_key]
+        
+        # self.model.load_state_dict(checkpoint)
 
         # Freeze the BERT layers if not finetuning
         if not finetune:
@@ -164,10 +194,10 @@ class ExtSummarizer(nn.Module):
         self.device = device
 
         # Initialize the ExBert model
-        self.exbert = exBert(
-            config_file='src/bert_config.json',
-            checkpoint_path='path.pth',
-            finetune=args.finetune_bert
+        self.exbert = exBert_model(
+            # config_file='src/bert_config.json',
+            # checkpoint_path='path.pth',
+            # finetune=args.finetune_bert
         )
         self.ext_layer = ExtTransformerEncoder(self.exbert.model.config.hidden_size, args.ext_ff_size, args.ext_heads,
                                                args.ext_dropout, args.ext_layers)
@@ -182,7 +212,6 @@ class ExtSummarizer(nn.Module):
         #     my_pos_embeddings.weight.data[512:] = self.bert.model.embeddings.position_embeddings.weight.data[-1][None,:].repeat(args.max_pos-512,1)
         #     self.bert.model.embeddings.position_embeddings = my_pos_embeddings
 
-
         if checkpoint is not None:
             self.load_state_dict(checkpoint['model'], strict=True)
         else:
@@ -193,6 +222,7 @@ class ExtSummarizer(nn.Module):
                 for p in self.ext_layer.parameters():
                     if p.dim() > 1:
                         xavier_uniform_(p)
+                        
 
         self.to(device)
 

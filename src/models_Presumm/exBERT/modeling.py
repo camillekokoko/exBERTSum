@@ -34,7 +34,7 @@ from torch import nn
 from torch.nn import CrossEntropyLoss
 import torch.mps as mps
 from models_Presumm import exBERT
-from exBERT import BertConfig, BertModel
+# from exBERT import BertConfig, BertModel
 
 from file_utils import cached_path
 
@@ -130,7 +130,7 @@ def swish(x):
 ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish}
 
 
-class BertConfig(object):
+class BertConfigNew(object):
     """Configuration class to store the configuration of a `BertModel`.
     """
     def __init__(self,
@@ -194,7 +194,7 @@ class BertConfig(object):
     @classmethod
     def from_dict(cls, json_object):
         """Constructs a `BertConfig` from a Python dictionary of parameters."""
-        config = BertConfig(vocab_size_or_config_json_file=-1)
+        config = BertConfigNew(vocab_size_or_config_json_file=-1)
         for key, value in json_object.items():
             config.__dict__[key] = value
         return config
@@ -630,7 +630,7 @@ class BertPreTrainedModel(nn.Module):
     """
     def __init__(self, config, *inputs, **kwargs):
         super(BertPreTrainedModel, self).__init__()
-        if not isinstance(config, BertConfig):
+        if not isinstance(config, BertConfigNew):
             raise ValueError(
                 "Parameter config in `{}(config)` should be an instance of class `BertConfig`. "
                 "To create a model from a Google pretrained model use "
@@ -779,9 +779,9 @@ class BertPreTrainedModel(nn.Module):
         return model
 
 
-class BertModel(BertPreTrainedModel):
+class BertModelNew(BertPreTrainedModel):
     def __init__(self, config, config_1=None):
-        super(BertModel, self).__init__(config)
+        super(BertModelNew, self).__init__(config)
         self.embeddings = BertEmbeddings(config, config_1)
         self.encoder = BertEncoder(config, config_1)
         self.pooler = BertPooler(config)
