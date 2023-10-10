@@ -15,12 +15,13 @@ import torch
 from pytorch_transformers import BertTokenizer
 
 import distributed
-from models import data_loader, model_builder
-from models.data_loader import load_dataset
-from models.loss import abs_loss
-from models.model_builder import AbsSummarizer
-from models.predictor import build_predictor
-from models.trainer import build_trainer
+# from src import models_Presumm
+from models_Presumm import data_loader, model_builder
+from models_Presumm.data_loader import load_dataset
+from models_Presumm.loss import abs_loss
+from models_Presumm.model_builder import AbsSummarizer
+from models_Presumm.predictor import build_predictor
+from models_Presumm.trainer import build_trainer
 from others.logging import logger, init_logger
 
 model_flags = ['hidden_size', 'ff_size', 'heads', 'emb_size', 'enc_layers', 'enc_hidden_size', 'enc_ff_size',
@@ -166,7 +167,7 @@ def validate_abs(args, device_id):
 
 
 def validate(args, device_id, pt, step):
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
     else:
@@ -198,7 +199,7 @@ def validate(args, device_id, pt, step):
 
 
 def test_abs(args, device_id, pt, step):
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
     else:
@@ -226,7 +227,7 @@ def test_abs(args, device_id, pt, step):
 
 
 def test_text_abs(args, device_id, pt, step):
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
     else:
@@ -276,7 +277,7 @@ def train_abs(args, device_id):
 def train_abs_single(args, device_id):
     init_logger(args.log_file)
     logger.info(str(args))
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     logger.info('Device ID %d' % device_id)
     logger.info('Device %s' % device)
     torch.manual_seed(args.seed)

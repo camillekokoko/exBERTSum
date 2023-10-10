@@ -126,7 +126,7 @@ def tokenize(args):
     print("Tokenizing %i files in %s and saving in %s..." % (len(stories), stories_dir, tokenized_stories_dir))
     subprocess.call(command)
     print("Stanford CoreNLP Tokenizer has finished.")
-    os.remove("mapping_for_corenlp.txt")
+    # os.remove("mapping_for_corenlp.txt")
 
     # Check that the tokenized stories directory contains the same number of files as the original directory
     num_orig = len(os.listdir(stories_dir))
@@ -276,13 +276,14 @@ def format_to_bert(args):
     if (args.dataset != ''):
         datasets = [args.dataset]
     else:
-        datasets = ['train', 'valid', 'test']
+        datasets = ['train', 'test']#'valid', 'test']
     for corpus_type in datasets:
         a_lst = []
-        for json_f in glob.glob(pjoin(args.raw_path, '*' + corpus_type + '.*.json')):
+        for json_f in glob.glob(pjoin(args.raw_path, '.' + corpus_type + '.*.json')):
             real_name = json_f.split('/')[-1]
+            print('real_name', real_name)
             a_lst.append((corpus_type, json_f, args, pjoin(args.save_path, real_name.replace('json', 'bert.pt'))))
-        print(a_lst)
+        print('a_list', a_lst)
         pool = Pool(args.n_cpus)
         for d in pool.imap(_format_to_bert, a_lst):
             pass

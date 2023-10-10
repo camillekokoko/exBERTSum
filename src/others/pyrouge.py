@@ -55,7 +55,8 @@ class DirectoryProcessor:
 
 class Rouge155(object):
     """
-    This is a wrapper for the ROUGE 1.5.5 summary evaluation package.
+    This is a wrapper for the ROUGE 1.5.5 summary evaluation package.Rouge155
+    
     This class is designed to simplify the evaluation process by:
 
         1) Converting summaries into a format ROUGE understands.

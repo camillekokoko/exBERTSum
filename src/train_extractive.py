@@ -14,10 +14,14 @@ import time
 import torch
 
 import distributed
-from models import data_loader, model_builder
-from models.data_loader import load_dataset
-from models.model_builder import ExtSummarizer
-from models.trainer_ext import build_trainer
+# from models import data_loader, model_builder 
+from models_Presumm import data_loader, model_builder_exBERT 
+
+from models_Presumm.data_loader import load_dataset
+# from models.model_builder import ExtSummarizer
+from models_Presumm.model_builder_exBERT import ExtSummarizer
+
+from models_Presumm.trainer_ext import build_trainer
 from others.logging import logger, init_logger
 
 model_flags = ['hidden_size', 'ff_size', 'heads', 'inter_layers', 'encoder', 'ff_actv', 'use_interval', 'rnn_size']
@@ -149,7 +153,7 @@ def validate_ext(args, device_id):
 
 
 def validate(args, device_id, pt, step):
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
     else:
@@ -174,7 +178,7 @@ def validate(args, device_id, pt, step):
 
 
 def test_ext(args, device_id, pt, step):
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu"  #if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
     else:
@@ -206,16 +210,16 @@ def train_ext(args, device_id):
 def train_single_ext(args, device_id):
     init_logger(args.log_file)
 
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
     logger.info('Device ID %d' % device_id)
     logger.info('Device %s' % device)
     torch.manual_seed(args.seed)
     random.seed(args.seed)
-    torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.deterministic = True
 
-    if device_id >= 0:
-        torch.cuda.set_device(device_id)
-        torch.cuda.manual_seed(args.seed)
+    # if device_id >= 0:
+    #     torch.cuda.set_device(device_id)
+    #     torch.cuda.manual_seed(args.seed)
 
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -233,11 +237,16 @@ def train_single_ext(args, device_id):
         checkpoint = None
 
     def train_iter_fct():
-        return data_loader.Dataloader(args, load_dataset(args, 'train', shuffle=True), args.batch_size, device,
+        print('load data start')
+        data = data_loader.Dataloader(args, load_dataset(args, 'train', shuffle=True), args.batch_size, device,
                                       shuffle=True, is_test=False)
+        print('load data end')
+        return data
 
     model = ExtSummarizer(args, device, checkpoint)
-    optim = model_builder.build_optim(args, model, checkpoint)
+    # optim = model_builder.build_optim(args, model, checkpoint)
+    optim = model_builder_exBERT.build_optim(args, model, checkpoint)
+
 
     logger.info(model)
 

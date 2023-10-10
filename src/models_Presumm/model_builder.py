@@ -5,9 +5,9 @@ import torch.nn as nn
 from pytorch_transformers import BertModel, BertConfig
 from torch.nn.init import xavier_uniform_
 
-from models.decoder import TransformerDecoder
-from models.encoder import Classifier, ExtTransformerEncoder
-from models.optimizers import Optimizer
+from models_Presumm.decoder import TransformerDecoder
+from models_Presumm.encoder import Classifier, ExtTransformerEncoder
+from models_Presumm.optimizers import Optimizer
 
 def build_optim(args, model, checkpoint):
     """ Build optimizer """
@@ -113,22 +113,38 @@ def get_generator(vocab_size, dec_hidden_size, device):
     return generator
 
 class Bert(nn.Module):
-    def __init__(self, large, temp_dir, finetune=False):
+    def __init__(self, large, temp_dir, finetune=True):
         super(Bert, self).__init__()
+        
         if(large):
             self.model = BertModel.from_pretrained('bert-large-uncased', cache_dir=temp_dir)
         else:
             self.model = BertModel.from_pretrained('bert-base-uncased', cache_dir=temp_dir)
 
         self.finetune = finetune
+        
+        print('print out ExtSummarizer', self)
+
+    
+# class Bert(nn.Module):
+    # def __init__(self, config_2 = 'config/bert_config_ex_s3.json'):
+    #     super(Bert, self).__init__()
+    #     bert_config_1 = BertConfig.from_json_file('config/bert_config.json')
+    #     bert_config_2 = BertConfig.from_json_file(config_2)
+
+    #     self.model = BertModel(bert_config_1, bert_config_2)
 
     def forward(self, x, segs, mask):
         if(self.finetune):
-            top_vec, _ = self.model(x, segs, attention_mask=mask)
+            top_vec, secondargument = self.model(x, segs, attention_mask=mask)
+            print('@@@@@ topvec', len(top_vec))
+            print('@@@@@ secondargument', len(secondargument))
         else:
             self.eval()
             with torch.no_grad():
                 top_vec, _ = self.model(x, segs, attention_mask=mask)
+                print('no finetune @@@@@ topvec', len(top_vec))
+                print('no finetune @@@@@ secondargument', len(secondargument))
         return top_vec
 
 
@@ -168,8 +184,33 @@ class ExtSummarizer(nn.Module):
         self.to(device)
 
     def forward(self, src, segs, clss, mask_src, mask_cls):
+        print('----->check:src', src)
+        print('----->check:segs', segs)
+        print('----->check:mask_src', mask_src )
+        
         top_vec = self.bert(src, segs, mask_src)
+        print('EXTTTTT len top_vec', len(top_vec))
+        print('EXTTTTT[0]len top_vec ', len(top_vec[0]))#.size())
+        
+        # print('EXTTTTT[1] len top_vec ', len(top_vec[1]))#.size())
+        print('type of top_vec', type(top_vec))
+        print('type of[0] top_vec', type(top_vec[0]))
+        # print('type of[1] top_vec', type(top_vec[1]))
+        
+        print('len[0] [0] top_vec size ', len(top_vec[0][0]))
+        # print('len[1] [0] top_vec size ', len(top_vec[1][0]))
+
+
         sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss]
+        # sents_vec_list = []
+
+        # for tensor in top_vec:
+        #     sents_vec = tensor[torch.arange(tensor.size(0)).unsqueeze(1), clss]
+        #     sents_vec_list.append(sents_vec)
+
+        
+        print('sents_vec', sents_vec)
+        print('sents_vec shape', sents_vec.shape)
         sents_vec = sents_vec * mask_cls[:, :, None].float()
         sent_scores = self.ext_layer(sents_vec, mask_cls).squeeze(-1)
         return sent_scores, mask_cls

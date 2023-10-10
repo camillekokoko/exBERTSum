@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 
-from models.neural import MultiHeadedAttention, PositionwiseFeedForward
+from models_Presumm.neural import MultiHeadedAttention, PositionwiseFeedForward
 
 
 class Classifier(nn.Module):
@@ -93,7 +93,7 @@ class ExtTransformerEncoder(nn.Module):
         x = x + pos_emb
 
         for i in range(self.num_inter_layers):
-            x = self.transformer_inter[i](i, x, x, 1 - mask)  # all_sents * max_tokens * dim
+            x = self.transformer_inter[i](i, x, x, ~mask)  # all_sents * max_tokens * dim
 
         x = self.layer_norm(x)
         sent_scores = self.sigmoid(self.wo(x))

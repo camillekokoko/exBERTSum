@@ -5,7 +5,7 @@ import torch
 from tensorboardX import SummaryWriter
 
 import distributed
-from models.reporter import ReportMgr, Statistics
+from models_Presumm.reporter import ReportMgr, Statistics
 from others.logging import logger
 from others.utils import test_rouge, rouge_results_to_str
 
@@ -28,7 +28,7 @@ def build_trainer(args, device_id, model, optims,loss):
         model_saver(:obj:`onmt.models.ModelSaverBase`): the utility object
             used to save the model
     """
-    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    device = "cpu" #if args.visible_gpus == '-1' else "cuda"
 
 
     grad_accum_count = args.accum_count
@@ -329,6 +329,7 @@ class Trainer(object):
         #                   else self.generator)
 
         model_state_dict = real_model.state_dict()
+
         # generator_state_dict = real_generator.state_dict()
         checkpoint = {
             'model': model_state_dict,
@@ -341,6 +342,7 @@ class Trainer(object):
         # checkpoint_path = '%s_step_%d.pt' % (FLAGS.model_path, step)
         if (not os.path.exists(checkpoint_path)):
             torch.save(checkpoint, checkpoint_path)
+
             return checkpoint, checkpoint_path
 
     def _start_report_manager(self, start_time=None):

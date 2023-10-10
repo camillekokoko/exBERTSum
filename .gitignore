@@ -1,0 +1,11 @@
+*_data/
+*_data_*/
+stanford-corenlp-4.5.5
+results/
+logs/
+*.story.json
+.DS_Store
+*.pyc
+*.txt
+temp/
+*.pth

@@ -5,7 +5,7 @@ import torch
 from tensorboardX import SummaryWriter
 
 import distributed
-from models.reporter_ext import ReportMgr, Statistics
+from models_Presumm.reporter_ext import ReportMgr, Statistics
 from others.logging import logger
 from others.utils import test_rouge, rouge_results_to_str
 
@@ -131,31 +131,39 @@ class Trainer(object):
         report_stats = Statistics()
         self._start_report_manager(start_time=total_stats.start_time)
 
+        print('train steps ', train_steps)
         while step <= train_steps:
-
+            print('current step ', step)
             reduce_counter = 0
             for i, batch in enumerate(train_iter):
+                print('batch number', i)
+                # print('self.n_gpu ', self.n_gpu)
+                # print('self.gpu_rank ', self.gpu_rank)
                 if self.n_gpu == 0 or (i % self.n_gpu == self.gpu_rank):
-
+                    # print('train checkpoint 1')
                     true_batchs.append(batch)
                     normalization += batch.batch_size
                     accum += 1
                     if accum == self.grad_accum_count:
                         reduce_counter += 1
                         if self.n_gpu > 1:
+                            # print('train checkpoint 2')
                             normalization = sum(distributed
                                                 .all_gather_list
                                                 (normalization))
 
+                        # print('gradient accmulation start')
                         self._gradient_accumulation(
                             true_batchs, normalization, total_stats,
                             report_stats)
 
+                        # print('report training')
                         report_stats = self._maybe_report_training(
                             step, train_steps,
                             self.optim.learning_rate,
                             report_stats)
 
+                        # print('report training ends')
                         true_batchs = []
                         accum = 0
                         normalization = 0
@@ -166,6 +174,7 @@ class Trainer(object):
                         if step > train_steps:
                             break
             train_iter = train_iter_fct()
+
 
         return total_stats
 
@@ -231,6 +240,7 @@ class Trainer(object):
             with open(gold_path, 'w') as save_gold:
                 with torch.no_grad():
                     for batch in test_iter:
+                        print('batch number', batch)
                         src = batch.src
                         labels = batch.src_sent_labels
                         segs = batch.segs
