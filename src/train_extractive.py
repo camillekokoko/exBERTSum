@@ -15,11 +15,12 @@ import torch
 
 import distributed
 # from models import data_loader, model_builder 
-from models_Presumm import data_loader, model_builder_exBERT 
+from models_Presumm import data_loader, model_builder_exBERT, model_builder
 
 from models_Presumm.data_loader import load_dataset
 # from models.model_builder import ExtSummarizer
-from models_Presumm.model_builder_exBERT import ExtSummarizer
+from models_Presumm.model_builder_exBERT import ExtSummarizer_exBERT
+from models_Presumm.model_builder import ExtSummarizer
 
 from models_Presumm.trainer_ext import build_trainer
 from others.logging import logger, init_logger
@@ -165,14 +166,23 @@ def validate(args, device_id, pt, step):
         if (k in model_flags):
             setattr(args, k, opt[k])
     print(args)
+    
+    
+    if args.exbert == True:
+        model = ExtSummarizer_exBERT(args, device, checkpoint)
+        model.eval()
+    elif args.exbert == False:
+        model = ExtSummarizer(args, device, checkpoint)
+        model.eval()
 
-    model = ExtSummarizer(args, device, checkpoint)
-    model.eval()
+    # model = ExtSummarizer_exBERT(args, device, checkpoint)
+    # model.eval()
 
     valid_iter = data_loader.Dataloader(args, load_dataset(args, 'valid', shuffle=False),
                                         args.batch_size, device,
                                         shuffle=False, is_test=False)
     trainer = build_trainer(args, device_id, model, None)
+
     stats = trainer.validate(valid_iter, step)
     return stats.xent()
 
@@ -190,9 +200,18 @@ def test_ext(args, device_id, pt, step):
         if (k in model_flags):
             setattr(args, k, opt[k])
     print(args)
+    
+    if args.exbert == True:
+        model = ExtSummarizer_exBERT(args, device, checkpoint)
+        # optim = model_builder.build_optim(args, model, checkpoint)
+        model.eval()
+    elif args.exbert == False:
+        model = ExtSummarizer(args, device, checkpoint)
+        model.eval()
 
-    model = ExtSummarizer(args, device, checkpoint)
-    model.eval()
+    
+    # model = ExtSummarizer(args, device, checkpoint)
+    # model.eval()
 
     test_iter = data_loader.Dataloader(args, load_dataset(args, 'test', shuffle=False),
                                        args.test_batch_size, device,
@@ -242,11 +261,13 @@ def train_single_ext(args, device_id):
                                       shuffle=True, is_test=False)
         print('load data end')
         return data
-
-    model = ExtSummarizer(args, device, checkpoint)
-    # optim = model_builder.build_optim(args, model, checkpoint)
-    optim = model_builder_exBERT.build_optim(args, model, checkpoint)
-
+    if args.exbert == True:
+        model = ExtSummarizer_exBERT(args, device, checkpoint)
+        # optim = model_builder.build_optim(args, model, checkpoint)
+        optim = model_builder_exBERT.build_optim(args, model, checkpoint)
+    elif args.exbert == False:
+        model = ExtSummarizer(args, device, checkpoint)
+        optim = model_builder.build_optim(args, model, checkpoint)
 
     logger.info(model)
 

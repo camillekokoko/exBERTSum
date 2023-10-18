@@ -337,7 +337,16 @@ class Trainer(object):
             'opt': self.args,
             'optims': self.optims,
         }
-        checkpoint_path = os.path.join(self.args.model_path, 'model_step_%d.pt' % step)
+            
+        path = self.args.bert_data_path
+        folder_name = path.split('/')[-1]
+        print(folder_name) #why empty?
+        
+        if self.args.exbert:
+            checkpoint_path = os.path.join(self.args.model_path,  f"{folder_name}_{str(self.args.lr)}_{str(self.args.batch_size)}_exbert_model_step_{step}.pt")
+        else:
+            checkpoint_path = os.path.join(self.args.model_path,  f"{folder_name}_{str(self.args.lr)}_{str(self.args.batch_size)}_bert_model_step_{step}.pt")
+
         logger.info("Saving checkpoint %s" % checkpoint_path)
         # checkpoint_path = '%s_step_%d.pt' % (FLAGS.model_path, step)
         if (not os.path.exists(checkpoint_path)):

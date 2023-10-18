@@ -126,78 +126,58 @@ def get_generator(vocab_size, dec_hidden_size, device):
 
     
 class exBert_model(nn.Module):
-    def __init__(self, config_2 = './bert_config_ex_s3.json', checkpoint_path='./models_Presumm/Best_stat_dic_exBERTe2_b16_lr1e-05.pth', finetune=False):
+    def __init__(self, args, config_2, checkpoint_path, finetune):
         super(exBert_model, self).__init__()
+        self.args = args
+        config_2 = args.config2  #'./bert_config_ex_s3.json'
+        checkpoint_path = args.checkpoint_path #='./models_Presumm/Best_stat_dic_exBERTe2_b16_lr1e-05.pth'
+        finetune = args.finetune_bert #default=True
         bert_config_1 = BertConfigNew.from_json_file('./bert_config.json')
         bert_config_2 = BertConfigNew.from_json_file(config_2)
-
+        self.finetune = finetune
+        print('finetune', self.finetune)
+        
+         
         self.model = BertModelNew(bert_config_1, bert_config_2)
-        checkpoint = torch.load(checkpoint_path)
+        self.checkpoint = torch.load(checkpoint_path)
         
-       
-        model_state_dict = self.state_dict()
-
-        def remove_prefix(key):
-            if key.startswith("bert.") or key.startswith("model.") :
-                return key[len("bert."):] or  key.startswith("model.")
-            return key
-
-        for checkpoint_key in checkpoint.keys():
-            model_key = remove_prefix(checkpoint_key)
-            if model_key in model_state_dict:
-                model_state_dict[model_key] = checkpoint[checkpoint_key]
-
-        self.model.load_state_dict(model_state_dict)
         
-        model_state_dict = self.state_dict()
-
-        # # Define a function to remove the "bert." prefix from keys
-        # def remove_prefix(key):
-        #     if key.startswith("bert."):
-        #          return key[len("bert."):]
-        #     return key
-        
-        # # Iterate through checkpoint keys and rename them
-        # for checkpoint_key in checkpoint.keys():
-        #     model_key = remove_prefix(checkpoint_key)
-        #     if model_key in model_state_dict:
-        #         model_state_dict[model_key] = checkpoint[checkpoint_key]
-        
-        # self.model.load_state_dict(checkpoint)
 
         # Freeze the BERT layers if not finetuning
-        if not finetune:
+        if not self.finetune:
             for param in self.model.parameters():
                 param.requires_grad = False 
 
-        for param in self.model.bert.bert.parameters(): 
-            param.requires_grad = False 
+        # for param in self.model.bert.bert.parameters(): 
+        #     param.requires_grad = False 
 
     def forward(self, x, segs, mask):
         if(self.finetune):
             top_vec, secondargument = self.model(x, segs, attention_mask=mask)
-            print('@@@@@ topvec', len(top_vec))
-            print('@@@@@ secondargument', len(secondargument))
+            # print('@@@@@ topvec', len(top_vec))
+            # print('@@@@@ secondargument', len(secondargument))
         else:
             self.eval()
             with torch.no_grad():
-                top_vec, _ = self.model(x, segs, attention_mask=mask)
-                print('no finetune @@@@@ topvec', len(top_vec))
-                print('no finetune @@@@@ secondargument', len(secondargument))
+                top_vec, secondargument = self.model(x, segs, attention_mask=mask)
+                # print('no finetune @@@@@ topvec', len(top_vec))
+                # print('no finetune @@@@@ secondargument', len(secondargument))
         return top_vec
 
 
-class ExtSummarizer(nn.Module):
+class ExtSummarizer_exBERT(nn.Module):   #i change this
     def __init__(self, args, device, checkpoint):
-        super(ExtSummarizer, self).__init__()
+        super(ExtSummarizer_exBERT, self).__init__() #i change this
         self.args = args
         self.device = device
 
         # Initialize the ExBert model
-        self.exbert = exBert_model(
+        self.exbert = exBert_model( args,
+            config_2=args.config2,
+            checkpoint_path=args.checkpoint_path,
             # config_file='src/bert_config.json',
             # checkpoint_path='path.pth',
-            # finetune=args.finetune_bert
+            finetune=args.finetune_bert
         )
         self.ext_layer = ExtTransformerEncoder(self.exbert.model.config.hidden_size, args.ext_ff_size, args.ext_heads,
                                                args.ext_dropout, args.ext_layers)
@@ -211,7 +191,29 @@ class ExtSummarizer(nn.Module):
         #     my_pos_embeddings.weight.data[:512] = self.bert.model.embeddings.position_embeddings.weight.data
         #     my_pos_embeddings.weight.data[512:] = self.bert.model.embeddings.position_embeddings.weight.data[-1][None,:].repeat(args.max_pos-512,1)
         #     self.bert.model.embeddings.position_embeddings = my_pos_embeddings
+ 
+        model_state_dict = self.exbert.state_dict()
 
+        def remove_prefix(key):
+            if key.startswith("model."):
+                return key[len("model."):]
+            if key.startswith("bert."):
+                return key[len("bert."):]
+            if key.startswith("exbert."):
+                return key[len("exbert."):]
+            if key.startswith("exbert.model."):
+                return key[len("exbert.model."):]
+            return key
+
+        for checkpoint_key in self.exbert.checkpoint.keys():
+            model_key = remove_prefix(checkpoint_key)
+            print('model_key', model_key)
+            if model_key in model_state_dict:
+                model_state_dict[model_key] = self.exbert.checkpoint[checkpoint_key]
+
+        self.exbert.load_state_dict(model_state_dict)
+        
+        model_state_dict = self.exbert.state_dict()
         if checkpoint is not None:
             self.load_state_dict(checkpoint['model'], strict=True)
         else:
@@ -232,6 +234,8 @@ class ExtSummarizer(nn.Module):
         print('----->check:mask_src', mask_src )
         
         top_vec = self.exbert(src, segs, mask_src)
+        for i in range(len(top_vec)):
+            print(f'shape{i}',top_vec[i] )
         print('EXTTTTT len top_vec', len(top_vec)) # debug
         print('EXTTTTT[0]len top_vec ', len(top_vec[0]))#.size()) # debug
         
@@ -242,15 +246,18 @@ class ExtSummarizer(nn.Module):
         
         print('len[0] [0] top_vec size ', len(top_vec[0][0])) # debug
         # print('len[1] [0] top_vec size ', len(top_vec[1][0])) # debug
-
-
-        sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss]
-        # sents_vec_list = [] # debug
-        # for tensor in top_vec: # debug
-        #     sents_vec = tensor[torch.arange(tensor.size(0)).unsqueeze(1), clss] # debug
-        #     sents_vec_list.append(sents_vec) # debug
-
         
+
+
+        top_vec_max, _ = torch.max(torch.stack(top_vec), dim=0)
+        print('max pooling', top_vec_max)
+        top_vec_mean =torch.mean(torch.stack(top_vec), dim=0) 
+        print('mean pooling', top_vec_mean)
+
+
+        sents_vec = top_vec_max[torch.arange(top_vec_max.size(0)).unsqueeze(1), clss]
+
+
         print('sents_vec', sents_vec)
         print('sents_vec shape', sents_vec.shape)
         sents_vec = sents_vec * mask_cls[:, :, None].float()

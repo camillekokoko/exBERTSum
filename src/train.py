@@ -27,9 +27,17 @@ def str2bool(v):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    #newly added
+    parser.add_argument("-exbert", type=str2bool, nargs='?', const=True, default=True)
+    parser.add_argument("-config2", default='./bert_config_ex_s3.json')
+    parser.add_argument("-checkpoint_path", default='./models_Presumm/Os3_Best_stat_dic_exBERTe2_b32_lr0.0001.pth')
+    
+    
+    
+    
     parser.add_argument("-task", default='ext', type=str, choices=['ext', 'abs'])
     parser.add_argument("-encoder", default='bert', type=str, choices=['bert', 'baseline'])
-    parser.add_argument("-mode", default='train', type=str, choices=['train', 'validate', 'test'])
+    parser.add_argument("-mode", default='train', type=str, choices=['train', 'validate', 'test']) #train, test
     parser.add_argument("-bert_data_path", default='../bert_data_new/cnndm')
     parser.add_argument("-model_path", default='../models/')
     parser.add_argument("-result_path", default='../results/cnndm')

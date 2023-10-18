@@ -21,6 +21,7 @@ from others.utils import clean
 from prepro.utils import _get_word_ngrams
 
 import xml.etree.ElementTree as ET
+from sklearn.model_selection import train_test_split
 
 nyt_remove_words = ["photo", "graph", "chart", "map", "table", "drawing"]
 
@@ -279,7 +280,7 @@ def format_to_bert(args):
         datasets = ['train', 'test']#'valid', 'test']
     for corpus_type in datasets:
         a_lst = []
-        for json_f in glob.glob(pjoin(args.raw_path, '.' + corpus_type + '.*.json')):
+        for json_f in glob.glob(pjoin(args.raw_path, '*.' + corpus_type + '.*.json')):
             real_name = json_f.split('/')[-1]
             print('real_name', real_name)
             a_lst.append((corpus_type, json_f, args, pjoin(args.save_path, real_name.replace('json', 'bert.pt'))))
@@ -330,49 +331,94 @@ def _format_to_bert(params):
 
 
 def format_to_lines(args):
-    corpus_mapping = {}
-    for corpus_type in ['valid', 'test', 'train']:
-        temp = []
-        for line in open(pjoin(args.map_path, 'mapping_' + corpus_type + '.txt')):
-            temp.append(hashhex(line.strip()))
-        corpus_mapping[corpus_type] = {key.strip(): 1 for key in temp}
-    train_files, valid_files, test_files = [], [], []
-    for f in glob.glob(pjoin(args.raw_path, '*.json')):
-        real_name = f.split('/')[-1].split('.')[0]
-        if (real_name in corpus_mapping['valid']):
-            valid_files.append(f)
-        elif (real_name in corpus_mapping['test']):
-            test_files.append(f)
-        elif (real_name in corpus_mapping['train']):
-            train_files.append(f)
-        # else:
-        #     train_files.append(f)
+    # corpus_mapping = {}
+    # for corpus_type in ['valid', 'test', 'train']: 
+    #     temp = []
+    #     for line in open(pjoin(args.map_path, 'mapping_' + corpus_type + '.txt')):
+    #         temp.append(hashhex(line.strip()))
+            
+    #     corpus_mapping[corpus_type] = {key.strip(): 1 for key in temp}
+    # train_files, valid_files, test_files = [], [], []
+    # for f in glob.glob(pjoin(args.raw_path, '*.json')):
+    #     real_name = f.split('/')[-1].split('.')[0]
+    #     if (real_name in corpus_mapping['valid']):
+    #         valid_files.append(f)
+    #     elif (real_name in corpus_mapping['test']):
+    #         test_files.append(f)
+    #     elif (real_name in corpus_mapping['train']):
+    #         train_files.append(f)
+    #     # else:
+    #     #     train_files.append(f)
 
-    corpora = {'train': train_files, 'valid': valid_files, 'test': test_files}
-    for corpus_type in ['train', 'valid', 'test']:
+    # corpora = {'train': train_files, 'valid': valid_files, 'test': test_files}
+    # for corpus_type in ['train', 'valid', 'test']:
+    #     a_lst = [(f, args) for f in corpora[corpus_type]]
+    #     pool = Pool(args.n_cpus)
+    #     dataset = []
+    #     p_ct = 0
+    #     for d in pool.imap_unordered(_format_to_lines, a_lst):
+    #         dataset.append(d)
+    #         if (len(dataset) > args.shard_size):
+    #             pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+    #             with open(pt_file, 'w') as save:
+    #                 # save.write('\n'.join(dataset))
+    #                 save.write(json.dumps(dataset))
+    #                 p_ct += 1
+    #                 dataset = []
+
+    #     pool.close()
+    #     pool.join()
+    #     if (len(dataset) > 0):
+    #         pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
+    #         with open(pt_file, 'w') as save:
+    #             # save.write('\n'.join(dataset))
+    #             save.write(json.dumps(dataset))
+    #             p_ct += 1
+    #             dataset = []
+    def hashhex(s):
+        """MD5 hash in hex."""
+        return hashlib.md5(s).hexdigest()
+
+    # Define the ratios for train and test
+    train_ratio = 0.7
+    test_ratio = 0.3
+
+    # Gather all JSON files in the raw_path directory
+    all_files = glob.glob(pjoin(args.raw_path, '*.json'))
+
+    # Determine the split points based on ratios
+    num_files = len(all_files)
+    train_split = int(train_ratio * num_files)
+    test_split = int(test_ratio * num_files)
+
+    train_files = all_files[:train_split]
+    test_files = all_files[train_split:train_split + test_split]
+
+    # Process the training and test files
+    corpora = {'train': train_files, 'test': test_files}
+    
+    for corpus_type in ['train', 'test']:
         a_lst = [(f, args) for f in corpora[corpus_type]]
         pool = Pool(args.n_cpus)
         dataset = []
         p_ct = 0
         for d in pool.imap_unordered(_format_to_lines, a_lst):
             dataset.append(d)
-            if (len(dataset) > args.shard_size):
+            if len(dataset) > args.shard_size:
                 pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
                 with open(pt_file, 'w') as save:
-                    # save.write('\n'.join(dataset))
                     save.write(json.dumps(dataset))
-                    p_ct += 1
-                    dataset = []
+                p_ct += 1
+                dataset = []
 
         pool.close()
         pool.join()
-        if (len(dataset) > 0):
+        if len(dataset) > 0:
             pt_file = "{:s}.{:s}.{:d}.json".format(args.save_path, corpus_type, p_ct)
             with open(pt_file, 'w') as save:
-                # save.write('\n'.join(dataset))
                 save.write(json.dumps(dataset))
-                p_ct += 1
-                dataset = []
+            p_ct += 1
+            dataset = []
 
 
 def _format_to_lines(params):

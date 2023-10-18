@@ -258,8 +258,16 @@ class Trainer(object):
                                             range(batch.batch_size)]
                         else:
                             sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+                            # labels = labels.view(-1)
+                            # print('labels', labels)
+                            # print('sent_scores_shape_input', sent_scores.shape)
+                            # print('labels.float()_shape_target', labels.float(),labels.float().shape )
+                            # print('labels_shape_target', labels,labels.shape)
 
-                            loss = self.loss(sent_scores, labels.float())
+                            
+                            loss = self.loss(sent_scores, labels.squeeze(-1).float())
+
+                            # loss = self.loss(sent_scores, labels.float())
                             loss = (loss * mask.float()).sum()
                             batch_stats = Statistics(float(loss.cpu().data.numpy()), len(labels))
                             stats.update(batch_stats)
@@ -367,7 +375,15 @@ class Trainer(object):
             'opt': self.args,
             'optim': self.optim,
         }
-        checkpoint_path = os.path.join(self.args.model_path, 'model_step_%d.pt' % step)
+        
+    
+        folder_name = self.args.config2
+        
+        if self.args.exbert:
+            checkpoint_path = os.path.join(self.args.model_path,  f"{folder_name}_{str(self.args.lr)}_{str(self.args.batch_size)}_exbert_model_step_{step}.pt")
+        else:
+            checkpoint_path = os.path.join(self.args.model_path,  f"{folder_name}_{str(self.args.lr)}_{str(self.args.batch_size)}_bert_model_step_{step}.pt")
+
         logger.info("Saving checkpoint %s" % checkpoint_path)
         # checkpoint_path = '%s_step_%d.pt' % (FLAGS.model_path, step)
         if (not os.path.exists(checkpoint_path)):

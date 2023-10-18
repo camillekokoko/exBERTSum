@@ -76,31 +76,32 @@ def load_dataset(args, corpus_type, shuffle):
 
     def _lazy_dataset_loader(pt_file, corpus_type):
         dataset = torch.load(pt_file)
+        # print('=====> dataset', dataset)
         logger.info('Loading %s dataset from %s, number of examples: %d' %
                     (corpus_type, pt_file, len(dataset)))    
         return dataset
     
-    print('start lazy dataset loader')
+    # print('start lazy dataset loader')
     
     # Sort the glob output by file name (by increasing indexes).
-    pts = sorted(glob.glob(args.bert_data_path + '.' + corpus_type + '.[0-9]*.pt'))
+    pts = sorted(glob.glob(args.bert_data_path + '*.' + corpus_type + '.[0-9]*.pt'))
     # print('pts', pts)
     if pts:
         if (shuffle):
             random.shuffle(pts)
 
         for pt in pts:
-            print('if pt', pt)
+            # print('if pt', pt)
             yield _lazy_dataset_loader(pt, corpus_type)
-            print('if pt checkpoint 2')
+            # print('if pt checkpoint 2')
     else:
         
         # Only one inputters.*Dataset, simple!
         pt = args.bert_data_path + '.' + corpus_type + '.pt'
-        print('else pt', pt)
+        # print('else pt', pt)
         yield _lazy_dataset_loader(pt, corpus_type)
 
-    print('finish lazy dataset loader')
+    # print('finish lazy dataset loader')
 
 def abs_batch_size_fn(new, count):
     src, tgt = new[0], new[1]
