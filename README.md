@@ -88,16 +88,7 @@ In command line:
      -config2 ./bert_config_ex_s2.json 
 
 
-## Reference
-
-**[Text Summarization with Pretrained Encoders](https://arxiv.org/abs/1908.08345)**
-**[github](https://github.com/cgmhaicenter/exBERT](https://github.com/nlpyang/PreSumm/tree/master)**
-
-
-
-
-
-Results on CNN/DailyMail (20/8/2019):
+Results on SA Community Data: (to completed)
 
 
 <table class="tg">
@@ -111,22 +102,34 @@ Results on CNN/DailyMail (20/8/2019):
     <td class="tg-c3ow" colspan="4">Extractive</td>
   </tr>
   <tr>
-    <td class="tg-0pky">TransformerExt</td>
-    <td class="tg-0pky">40.90</td>
-    <td class="tg-0pky">18.02</td>
-    <td class="tg-0pky">37.17</td>
+    <td class="tg-0pky">OS1</td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
   </tr>
   <tr>
-    <td class="tg-0pky">BertSumExt</td>
-    <td class="tg-0pky">43.23</td>
-    <td class="tg-0pky">20.24</td>
-    <td class="tg-0pky">39.63</td>
+    <td class="tg-0pky">OS2</td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
   </tr>
   <tr>
-    <td class="tg-0pky">BertSumExt (large)</td>
-    <td class="tg-0pky">43.85</td>
-    <td class="tg-0pky">20.34</td>
-    <td class="tg-0pky">39.90</td>
+    <td class="tg-0pky">OS3</td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+  </tr>
+      <tr>
+    <td class="tg-0pky">OS4</td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+  </tr>
+      <tr>
+    <td class="tg-0pky">OS5</td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky"></td>
   </tr>
   <tr>
     <td class="tg-baqh" colspan="4">Abstractive</td>
@@ -137,54 +140,34 @@ Results on CNN/DailyMail (20/8/2019):
     <td class="tg-0lax">17.76</td>
     <td class="tg-0lax">37.09</td>
   </tr>
-  <tr>
-    <td class="tg-0lax">BertSumAbs</td>
-    <td class="tg-0lax">41.72</td>
-    <td class="tg-0lax">19.39</td>
-    <td class="tg-0lax">38.76</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">BertSumExtAbs</td>
-    <td class="tg-0lax">42.13</td>
-    <td class="tg-0lax">19.60</td>
-    <td class="tg-0lax">39.18</td>
-  </tr>
 </table>
 
 
-
-#### Step 1 Download Stories
-Download and unzip the `stories` directories from [here](http://cs.nyu.edu/~kcho/DMQA/) for both CNN and Daily Mail. Put all  `.story` files in one directory (e.g. `../raw_stories`)
-
-####  Step 2. Download Stanford CoreNLP
-We will need Stanford CoreNLP to tokenize the data. Download it [here](https://stanfordnlp.github.io/CoreNLP/) and unzip it. Then add the following command to your bash_profile:
-```
-export CLASSPATH=/path/to/stanford-corenlp-full-2017-06-09/stanford-corenlp-3.8.0.jar
-```
-replacing `/path/to/` with the path to where you saved the `stanford-corenlp-full-2017-06-09` directory. 
-
-####  Step 3. Sentence Splitting and Tokenization
-
-```
-python preprocess.py -mode tokenize -raw_path RAW_PATH -save_path TOKENIZED_PATH
-```
-
-* `RAW_PATH` is the directory containing story files (`../raw_stories`), `JSON_PATH` is the target directory to save the generated json files (`../merged_stories_tokenized`)
+## Sentence Representation:
+In command line:
+        
+        export CLASSPATH=/Users/camilleko/PreSumm/stanford-corenlp-4.5.5/stanford-corenlp-4.5.5.jar
 
 
-####  Step 4. Format to Simpler Json Files
- 
-```
-python preprocess.py -mode format_to_lines -raw_path RAW_PATH -save_path JSON_PATH -n_cpus 1 -use_bert_basic_tokenizer false -map_path MAP_PATH
-```
+        python preprocess.py -mode tokenize -raw_path ../raw_data/story_files/ -save_path ../merged_story_files_tokenized
 
-* `RAW_PATH` is the directory containing tokenized files (`../merged_stories_tokenized`), `JSON_PATH` is the target directory to save the generated json files (`../json_data/cnndm`), `MAP_PATH` is the  directory containing the urls files (`../urls`)
+        python preprocess.py -mode format_to_lines -raw_path ../merged_story_files_tokenized -save_path ../json_data_story_files/ -n_cpus 1 -use_bert_basic_tokenizer false -map_path ../urls
 
-####  Step 5. Format to PyTorch Files
-```
-python preprocess.py -mode format_to_bert -raw_path JSON_PATH -save_path BERT_DATA_PATH  -lower -n_cpus 1 -log_file ../logs/preprocess.log
-```
 
-* `JSON_PATH` is the directory containing json files (`../json_data`), `BERT_DATA_PATH` is the target directory to save the generated binary files (`../bert_data`)
+        python preprocess.py -mode format_to_bert -raw_path ../json_data_story_files/ -save_path ../bert_data_story_files/  -lower -n_cpus 1 -log_file ../logs/preprocess.log
+
+
+        export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES 
+
+        python preprocess.py -mode format_to_bert -raw_path ../json_data_1 -save_path ../bert_data_1  -lower -n_cpus 1 -log_file ../logs/preprocess.log
+
+
+## Reference
+
+**[Text Summarization with Pretrained Encoders](https://arxiv.org/abs/1908.08345)**
+**[github](https://github.com/cgmhaicenter/exBERT](https://github.com/nlpyang/PreSumm/tree/master)**
+
+
+
 
 
