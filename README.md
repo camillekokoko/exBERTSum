@@ -1,15 +1,100 @@
-# PreSumm
 
-**This code is for EMNLP 2019 paper [Text Summarization with Pretrained Encoders](https://arxiv.org/abs/1908.08345)**
+# [exBERTSum] Leveraging Large Language Model with Domain Adaption: Enhancing Community Directories with Deep Learning Text Summarization for Machine-Readable Cataloging (MARC) Standard Description Notes
 
-**Updates Jan 22 2020**: Now you can **Summarize Raw Text Input!**. Swith to the dev branch, and use `-mode test_text` and use `-text_src $RAW_SRC.TXT` to input your text file. Please still use master branch for normal training and evaluation, dev branch should be only used for test_text mode.
-* abstractive use -task abs, extractive use -task ext
-* use `-test_from $PT_FILE$` to use your model checkpoint file.
-* Format of the source text file:
-  * For **abstractive summarization**, each line is a document.
-  * If you want to do **extractive summarization**, please insert ` [CLS] [SEP] ` as your sentence boundaries.
-* There are example input files in the [raw_data directory](https://github.com/nlpyang/PreSumm/tree/dev/raw_data)
-* If you also have reference summaries aligned with your source input, please use `-text_tgt $RAW_TGT.TXT` to keep the order for evaluation.
+This project is a part of the Master of AI and Machine Learning Research.  Other projects can be found at the [main GitHub repo](https://github.com/camillekokoko/exBERT). Presentation can be found at the [youtube link](https://www.youtube.com/watch?v=6KChrujZ3_4)
+
+#### -- Project Status: [Active, On-Hold, Completed]
+
+## Project Intro/Objective
+The purpose of this project is to build a system utilizing Natural Language Processing (NLP) to generate informative summaries from community's directories in South Australia, accompanied by machine-readable cataloging in adherence to the MARC standard's description notes (Library of Congress 2023).
+
+### Partner
+* [SACommunity](https://sacommunity.org/)
+
+### Methods Used
+* Generative AI
+* Finetune Large Language Models 
+* Pretrain Transformer BERT
+* Natural Language Processing
+* Data Visualization
+* etc.
+
+### Technologies
+* Python
+* Pandas, jupyter
+* Pytorch
+* Docker
+* MySql
+* YAML
+* JSON
+* etc. 
+
+## Project Description (to completed)
+(Provide more detailed overview of the project.  Talk a bit about your data sources and what questions and hypothesis you are exploring. What specific data analysis/visualization and modelling work are you using to solve the problem? What blockers and challenges are you facing?  Feel free to number or bullet point things here)
+
+## Getting Started (to be completed)
+
+1. Clone this repo 
+2. Raw Data is being kept [here](Repo folder containing raw data) within this repo.
+3. Data processing/transformation scripts are being kept [here](Repo folder containing data processing scripts/notebooks)
+4. Command Scripts are being kept [here]()
+
+## Pre-train an exBERTSum model 
+In command line:
+
+    python train.py \
+    -task ext -mode train \
+    -bert_data_path ../bert_data/ \
+    -ext_dropout 0.1 \
+    -model_path ../models/bertbase \
+    -lr 2e-3 \
+    -visible_gpus 0 \
+    -report_every 1000 \
+    -save_checkpoint_steps 1000 \
+    -batch_size 32 \
+    -train_steps 1000 \
+    -accum_count 2 \
+    -log_file ../logs/ext_bertbaseCs2.log \
+    -use_interval true \
+    -warmup_steps 10000 \
+    -max_pos 512 \
+    -exbert True \
+    -finetune False \
+    -config2 ./bert_config_ex_s2.json \
+    -checkpoint_path ./models_Presumm/Cs2_Best_stat_dic_exBERTe2_b32_lr0.0001.pth
+
+## Validation/Test an exBERTSum model 
+In command line:
+
+    python train.py \
+     -task ext \
+     -mode test \
+     -batch_size 32 \
+     -test_batch_size 32 \
+     -bert_data_path ../bert_data_story_files/ \
+     -model_path ../models/bertbase \
+     -test_from ../models/bertbase/bert_config_ex_Cs2.json_0.002_32_exbert_model_step_1000.pt
+     -log_file ../logs/test_ext_bertbaseCs2_testtest.log \
+     -result_path ../results/ext_bertbase \
+     -sep_optim true \
+     -use_interval true \
+     -visible_gpus -1 \
+     -max_pos 512 \
+     -max_length 128 \
+     -alpha 0.95 \
+     -min_length 50 \
+     -finetune_bert True \
+     -exbert True \
+     -config2 ./bert_config_ex_s2.json 
+
+
+## Reference
+
+**[Text Summarization with Pretrained Encoders](https://arxiv.org/abs/1908.08345)**
+**[github](https://github.com/cgmhaicenter/exBERT](https://github.com/nlpyang/PreSumm/tree/master)**
+
+
+
 
 
 Results on CNN/DailyMail (20/8/2019):
@@ -66,42 +151,7 @@ Results on CNN/DailyMail (20/8/2019):
   </tr>
 </table>
 
-**Python version**: This code is in Python3.6
 
-**Package Requirements**: torch==1.1.0 pytorch_transformers tensorboardX multiprocess pyrouge
-
-
-
-**Updates**: For encoding a text longer than 512 tokens, for example 800. Set max_pos to 800 during both preprocessing and training.
-
-
-Some codes are borrowed from ONMT(https://github.com/OpenNMT/OpenNMT-py)
-
-## Trained Models
-[CNN/DM BertExt](https://drive.google.com/open?id=1kKWoV0QCbeIuFt85beQgJ4v0lujaXobJ)
-
-[CNN/DM BertExtAbs](https://drive.google.com/open?id=1-IKVCtc4Q-BdZpjXc4s70_fRsWnjtYLr)
-
-[CNN/DM TransformerAbs](https://drive.google.com/open?id=1yLCqT__ilQ3mf5YUUCw9-UToesX5Roxy)
-
-[XSum BertExtAbs](https://drive.google.com/open?id=1H50fClyTkNprWJNh10HWdGEdDdQIkzsI)
-
-## System Outputs
-
-[CNN/DM and XSum](https://drive.google.com/file/d/1kYA384UEAQkvmZ-yWZAfxw7htCbCwFzC) 
-
-## Data Preparation For XSum
-[Pre-processed data](https://drive.google.com/open?id=1BWBN1coTWGBqrWoOfRc5dhojPHhatbYs)
-
-
-## Data Preparation For CNN/Dailymail
-### Option 1: download the processed data
-
-[Pre-processed data](https://drive.google.com/open?id=1DN7ClZCCXsk2KegmC6t4ClBwtAf5galI)
-
-unzip the zipfile and put all `.pt` files into `bert_data`
-
-### Option 2: process the data yourself
 
 #### Step 1 Download Stories
 Download and unzip the `stories` directories from [here](http://cs.nyu.edu/~kcho/DMQA/) for both CNN and Daily Mail. Put all  `.story` files in one directory (e.g. `../raw_stories`)
@@ -137,45 +187,4 @@ python preprocess.py -mode format_to_bert -raw_path JSON_PATH -save_path BERT_DA
 
 * `JSON_PATH` is the directory containing json files (`../json_data`), `BERT_DATA_PATH` is the target directory to save the generated binary files (`../bert_data`)
 
-## Model Training
-
-**First run: For the first time, you should use single-GPU, so the code can download the BERT model. Use ``-visible_gpus -1``, after downloading, you could kill the process and rerun the code with multi-GPUs.**
-
-### Extractive Setting
-
-```
-python train.py -task ext -mode train -bert_data_path BERT_DATA_PATH -ext_dropout 0.1 -model_path MODEL_PATH -lr 2e-3 -visible_gpus 0,1,2 -report_every 50 -save_checkpoint_steps 1000 -batch_size 3000 -train_steps 50000 -accum_count 2 -log_file ../logs/ext_bert_cnndm -use_interval true -warmup_steps 10000 -max_pos 512
-```
-
-### Abstractive Setting
-
-#### TransformerAbs (baseline)
-```
-python train.py -mode train -accum_count 5 -batch_size 300 -bert_data_path BERT_DATA_PATH -dec_dropout 0.1 -log_file ../../logs/cnndm_baseline -lr 0.05 -model_path MODEL_PATH -save_checkpoint_steps 2000 -seed 777 -sep_optim false -train_steps 200000 -use_bert_emb true -use_interval true -warmup_steps 8000  -visible_gpus 0,1,2,3 -max_pos 512 -report_every 50 -enc_hidden_size 512  -enc_layers 6 -enc_ff_size 2048 -enc_dropout 0.1 -dec_layers 6 -dec_hidden_size 512 -dec_ff_size 2048 -encoder baseline -task abs
-```
-#### BertAbs
-```
-python train.py  -task abs -mode train -bert_data_path BERT_DATA_PATH -dec_dropout 0.2  -model_path MODEL_PATH -sep_optim true -lr_bert 0.002 -lr_dec 0.2 -save_checkpoint_steps 2000 -batch_size 140 -train_steps 200000 -report_every 50 -accum_count 5 -use_bert_emb true -use_interval true -warmup_steps_bert 20000 -warmup_steps_dec 10000 -max_pos 512 -visible_gpus 0,1,2,3  -log_file ../logs/abs_bert_cnndm
-```
-#### BertExtAbs
-```
-python train.py  -task abs -mode train -bert_data_path BERT_DATA_PATH -dec_dropout 0.2  -model_path MODEL_PATH -sep_optim true -lr_bert 0.002 -lr_dec 0.2 -save_checkpoint_steps 2000 -batch_size 140 -train_steps 200000 -report_every 50 -accum_count 5 -use_bert_emb true -use_interval true -warmup_steps_bert 20000 -warmup_steps_dec 10000 -max_pos 512 -visible_gpus 0,1,2,3 -log_file ../logs/abs_bert_cnndm  -load_from_extractive EXT_CKPT   
-```
-* `EXT_CKPT` is the saved `.pt` checkpoint of the extractive model.
-
-
-
-
-## Model Evaluation
-### CNN/DM
-```
- python train.py -task abs -mode validate -batch_size 3000 -test_batch_size 500 -bert_data_path BERT_DATA_PATH -log_file ../logs/val_abs_bert_cnndm -model_path MODEL_PATH -sep_optim true -use_interval true -visible_gpus 1 -max_pos 512 -max_length 200 -alpha 0.95 -min_length 50 -result_path ../logs/abs_bert_cnndm 
-```
-### XSum
-```
- python train.py -task abs -mode validate -batch_size 3000 -test_batch_size 500 -bert_data_path BERT_DATA_PATH -log_file ../logs/val_abs_bert_cnndm -model_path MODEL_PATH -sep_optim true -use_interval true -visible_gpus 1 -max_pos 512 -min_length 20 -max_length 100 -alpha 0.9 -result_path ../logs/abs_bert_cnndm 
-```
-* `-mode` can be {`validate, test`}, where `validate` will inspect the model directory and evaluate the model for each newly saved checkpoint, `test` need to be used with `-test_from`, indicating the checkpoint you want to use
-* `MODEL_PATH` is the directory of saved checkpoints
-* use `-mode valiadte` with `-test_all`, the system will load all saved checkpoints and select the top ones to generate summaries (this will take a while)
 
