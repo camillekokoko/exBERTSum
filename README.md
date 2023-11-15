@@ -89,8 +89,6 @@ In command line:
 
 
 Results on SA Community Data: (to completed)
-
-
 <table class="tg">
   <tr>
     <th class="tg-0pky">Models</th>
@@ -98,9 +96,7 @@ Results on SA Community Data: (to completed)
     <th class="tg-0pky">ROUGE-2</th>
     <th class="tg-0pky">ROUGE-L</th>
   </tr>
-  <tr>
-    <td class="tg-c3ow" colspan="4">Extractive</td>
-  </tr>
+
   <tr>
     <td class="tg-0pky">OS1</td>
     <td class="tg-0pky"></td>
@@ -130,16 +126,7 @@ Results on SA Community Data: (to completed)
     <td class="tg-0pky"></td>
     <td class="tg-0pky"></td>
     <td class="tg-0pky"></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh" colspan="4">Abstractive</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">TransformerAbs</td>
-    <td class="tg-0lax">40.21</td>
-    <td class="tg-0lax">17.76</td>
-    <td class="tg-0lax">37.09</td>
-  </tr>
+      </tr>
 </table>
 
 
