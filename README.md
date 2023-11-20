@@ -1,7 +1,7 @@
 
 # [exBERTSum] Leveraging Large Language Model with Domain Adaption: Enhancing Community Directories with Deep Learning Text Summarization for Machine-Readable Cataloging (MARC) Standard Description Notes
 
-This project is a part of the Master of AI and Machine Learning Research.  Other projects can be found at the [main GitHub repo](https://github.com/camillekokoko/exBERT). Presentation can be found at the [youtube link](https://www.youtube.com/watch?v=6KChrujZ3_4)
+This project is a part of the Master of AI and Machine Learning Research.  Other projects can be found at the [main GitHub repo](https://github.com/camillekokoko/exBERT). Presentation can be found at the [youtube link](https://www.youtube.com/watch?v=srKsCCE_l8Y)
 
 #### -- Project Status: [Active, On-Hold, Completed]
 
