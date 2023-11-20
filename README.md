@@ -111,7 +111,7 @@ Results on SA Community Data: (to completed)
   <tr>
     <td class="tg-0pky">OS2</td>
     <td class="tg-0pky">66.10</td>
-    <td class="tg-0pky">62</td>
+    <td class="tg-0pky">62.00</td>
     <td class="tg-0pky">64.32</td>
   </tr>
   <tr>
