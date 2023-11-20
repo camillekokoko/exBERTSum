@@ -96,36 +96,41 @@ Results on SA Community Data: (to completed)
     <th class="tg-0pky">ROUGE-2</th>
     <th class="tg-0pky">ROUGE-L</th>
   </tr>
-
+ <tr>
+    <td class="tg-0pky">Baseline</td>
+    <td class="tg-0pky">64.05</td>
+    <td class="tg-0pky">60.09</td>
+    <td class="tg-0pky">61.11</td>
+  </tr>
   <tr>
     <td class="tg-0pky">OS1</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td class="tg-0pky">65.59</td>
+    <td class="tg-0pky">61.24</td>
+    <td class="tg-0pky">63.92</td>
   </tr>
   <tr>
     <td class="tg-0pky">OS2</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td class="tg-0pky">66.10</td>
+    <td class="tg-0pky">62</td>
+    <td class="tg-0pky">64.32</td>
   </tr>
   <tr>
     <td class="tg-0pky">OS3</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td class="tg-0pky">65.02</td>
+    <td class="tg-0pky">60.46</td>
+    <td class="tg-0pky">63.17</td>
   </tr>
       <tr>
     <td class="tg-0pky">OS4</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td class="tg-0pky">65.85</td>
+    <td class="tg-0pky">61.65</td>
+    <td class="tg-0pky">64.18</td>
   </tr>
       <tr>
     <td class="tg-0pky">OS5</td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
-    <td class="tg-0pky"></td>
+    <td class="tg-0pky">64.33</td>
+    <td class="tg-0pky">59.49</td>
+    <td class="tg-0pky">62.38</td>
       </tr>
 </table>
 
