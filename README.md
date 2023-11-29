@@ -153,11 +153,12 @@ In command line:
 
         python preprocess.py -mode format_to_bert -raw_path ../json_data_1 -save_path ../bert_data_1  -lower -n_cpus 1 -log_file ../logs/preprocess.log
 
+see [AWS_EC2_Docker](https://github.com/camillekokoko/AWS_EC2_Docker) for deployment
 
 ## Reference
 
 **[Text Summarization with Pretrained Encoders](https://arxiv.org/abs/1908.08345)**
-**[github](https://github.com/cgmhaicenter/exBERT](https://github.com/nlpyang/PreSumm/tree/master)**
+**[github](https://github.com/nlpyang/PreSumm/tree/master)**
 
 
 
